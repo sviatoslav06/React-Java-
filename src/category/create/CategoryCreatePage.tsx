@@ -9,7 +9,6 @@ import http_common from "../../http_common.ts";
 
 const CategoryCreatePage = () => {
     const navigate = useNavigate();
-
     const [form] = Form.useForm<ICategoryCreate>();
 
     const onHandlerSubmit = async (values: ICategoryCreate) => {

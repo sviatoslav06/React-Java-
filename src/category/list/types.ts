@@ -1,10 +1,19 @@
 export interface ICategoryItem{
     id: number;
     name: string;
-    image: File|undefined;
+    image: string;
     description: string;
 }
 
-export interface IUploadFile{
-    originFileObj: File;
+export interface IGetCategories {
+    content: ICategoryItem[],
+    totalPages: number,
+    totalElements: number,
+    number: number
+}
+
+export interface ICategorySearch{
+    name: string,
+    page: number,
+    size: number
 }
