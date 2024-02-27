@@ -18,7 +18,7 @@ const CategoryEditPage = () => {
 
     const onSubmit = async (values: ICategoryEdit) => {
         try {
-            await http_common.put("/api/categories", values, {
+            await http_common.put("/api/categories", values, { // Оновлення продукту за допомогою PUT-метода
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -30,10 +30,10 @@ const CategoryEditPage = () => {
     }
 
     useEffect(() => {
-        http_common.get<ICategoryItem>(`/api/categories/${id}`)
+        http_common.get<ICategoryItem>(`/api/categories/${id}`) // Витягування продукту з сервера
             .then(resp => {
-                const {data} = resp;
-                form.setFieldsValue(data);
+                const {data} = resp; // Внесення витягнутого продукту у змінну
+                form.setFieldsValue(data); // Заповнення полів форми
                 setFile(
                     {
                         uid: '-1',

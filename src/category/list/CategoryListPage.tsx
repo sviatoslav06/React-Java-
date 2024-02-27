@@ -6,7 +6,8 @@ import http_common from "../../http_common.ts";
 import CategoryCard from "./CategoryCard.tsx";
 
 const CategoryListPage = () => {
-
+    // Змінна яка містить в собі інформацію про категорії, витягнуті з бази, кількість сторінок які будуть відображатись,
+    // кількість елементів на сторінціі
     const [data, setData] = useState<IGetCategories>({
         content: [],
         totalPages: 0,
@@ -14,55 +15,61 @@ const CategoryListPage = () => {
         number: 0
     });
 
+    // Змінна яка містить в собі параметри пошукового запиту
     const [searchParams, setSearchParams] = useSearchParams();
 
+    // Змінна, яка містить параметри пошуку та задає їм дефолтні значення
     const [formParams, setFormParams] = useState<ICategorySearch>({
         name: searchParams.get('name') || "",
         page: Number(searchParams.get('page')) || 1,
         size: Number(searchParams.get('size')) || 2
     });
 
+    // Форма
     const [form] = Form.useForm<ICategorySearch>();
 
+    // Функція, яка буде виконана при натисканні кнопки. Функція задає номер сторінки, зчитує пошукові параметри
     const onSubmit = async (values: ICategorySearch) => {
         findCategories({...formParams, page: 1, name: values.name});
     }
 
 
     useEffect(() => {
-        http_common.get<IGetCategories>("/api/categories/search", {
+        http_common.get<IGetCategories>("/api/categories/search", { // Запит на сервер методом get
             params: {
                 ...formParams,
-                page: formParams.page-1
+                page: formParams.page-1 // скидання сторінки на нульеву при пошуку
             }
         })
             .then(resp => {
-                console.log("Items", resp.data);
-                setData(resp.data);
-                form.setFieldsValue(formParams);
+                console.log("Items", resp.data); // вивід даних в консоль
+                setData(resp.data); // задання змінній data отриманих даних при пошуку
+                form.setFieldsValue(formParams); // заповнення форми зчитаними з БД даними
             });
     }, [formParams]);
 
+    // Змінна, яка зберігає в собі всі категорії та їхню кількість
     const {content, totalElements} = data;
 
     const handleDelete = async (id: number) => {
         try {
-            await http_common.delete(`/api/categories/${id}`);
-            setData({ ...data, content: content.filter(x => x.id != id)} );
+            await http_common.delete(`/api/categories/${id}`); // Запит на видалення категорії
+            setData({ ...data, content: content.filter(x => x.id != id)} ); // Видалення предметів по id
         } catch (error) {
             throw new Error(`Error: ${error}`);
         }
     }
 
     const handlePageChange = async (page: number, newPageSize: number) => {
-        findCategories({...formParams, page, size: newPageSize});
+        findCategories({...formParams, page, size: newPageSize}); // Оновлення сторінки після пошуку
     };
 
     const findCategories = (model: ICategorySearch) => {
-        setFormParams(model);
-        updateSearchParams(model);
+        setFormParams(model); // Задання формі параметрів моделі, яка була знайдена під час пошуку
+        updateSearchParams(model); // Оновлення пошукових параметрів
     }
 
+    // Функція, яка перевіряє чи є поле пошуку пустим, тоді сетить в параметри пошуковий запит
     const updateSearchParams = (params : ICategorySearch) =>{
         for (const [key, value] of Object.entries(params)) {
             if (value !== undefined && value !== 0 && value!="") {
