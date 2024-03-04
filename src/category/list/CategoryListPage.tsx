@@ -21,26 +21,32 @@ const CategoryListPage = () => {
     // Змінна, яка містить параметри пошуку та задає їм дефолтні значення
     const [formParams, setFormParams] = useState<ICategorySearch>({
         name: searchParams.get('name') || "",
+        description: searchParams.get('description') || "",
         page: Number(searchParams.get('page')) || 1,
         size: Number(searchParams.get('size')) || 2
     });
+
 
     // Форма
     const [form] = Form.useForm<ICategorySearch>();
 
     // Функція, яка буде виконана при натисканні кнопки. Функція задає номер сторінки, зчитує пошукові параметри
     const onSubmit = async (values: ICategorySearch) => {
-        findCategories({...formParams, page: 1, name: values.name});
+        findCategories({...formParams, page: 1, name: values.name, description: values.description});
     }
 
 
+
     useEffect(() => {
-        http_common.get<IGetCategories>("/api/categories/search", { // Запит на сервер методом get
+        http_common.get<IGetCategories>("/api/categories/search", {
             params: {
                 ...formParams,
-                page: formParams.page-1 // скидання сторінки на нульеву при пошуку
+                page: formParams.page - 1, // Resetting page to zero when searching
+                name: formParams.name,
+                description: formParams.description
             }
         })
+
             .then(resp => {
                 console.log("Items", resp.data); // вивід даних в консоль
                 setData(resp.data); // задання змінній data отриманих даних при пошуку
@@ -70,9 +76,9 @@ const CategoryListPage = () => {
     }
 
     // Функція, яка перевіряє чи є поле пошуку пустим, тоді сетить в параметри пошуковий запит
-    const updateSearchParams = (params : ICategorySearch) =>{
+    const updateSearchParams = (params: ICategorySearch) => {
         for (const [key, value] of Object.entries(params)) {
-            if (value !== undefined && value !== 0 && value!="") {
+            if (value !== undefined && value !== 0 && value !== "") {
                 searchParams.set(key, value);
             } else {
                 searchParams.delete(key);
@@ -80,6 +86,7 @@ const CategoryListPage = () => {
         }
         setSearchParams(searchParams);
     };
+
 
     return (
         <>
@@ -89,9 +96,7 @@ const CategoryListPage = () => {
             </Link>
 
             <Row gutter={16}>
-                <Form form={form}
-                      onFinish={onSubmit}
-                      layout={"vertical"}
+                <Form form={form} onFinish={onSubmit} layout={"vertical"}
                       style={{
                           minWidth: '100%',
                           display: 'flex',
@@ -107,6 +112,15 @@ const CategoryListPage = () => {
                     >
                         <Input autoComplete="name"/>
                     </Form.Item>
+
+                    <Form.Item
+                        label="Опис"
+                        name="description"
+                        htmlFor="description"
+                    >
+                        <Input autoComplete="description"/>
+                    </Form.Item>
+
 
                     <Row style={{display: 'flex', justifyContent: 'center'}}>
                         <Button style={{margin: 10}} type="primary" htmlType="submit">
